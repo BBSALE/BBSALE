@@ -1,0 +1,65 @@
+website:bb.sale
+
+1. Coinage
+1) Standard token features:
+explain:
+-Basic token with all standard functions
+Contract source code:
+- https://github.com/BBSALE/bbsale/blob/main/MintToken/MintStandardToken.sol
+Contract:
+0xF68F5a710356A0a22b2B2ac8B3192Bf39388a996
+2) Liquidity generator token features:
+explain:
+-Automatically generate yield and liquidity
+-Custom reward holder rate
+-Custom liquidity expense proportion
+-Whitelist function
+Contract source code:
+- https://github.com/BBSALE/bbsale/blob/main/MintToken/MintLiquidityToken.sol
+Contract:
+0xe65A355Ad383514287804CAac07b5131063B1AcA
+2. Locking function
+1) Liquidity lock
+explain
+-Custom release time
+-Custom release times
+-Define lock quantity and logo
+-The lock up quantity is stored in the contract
+Contract source code:
+- https://github.com/BBSALE/bbsale/blob/main/Lock/LockLPToken.sol
+Contract:
+0x2fB0BA3d4d14D72bA01582612981eBb40135931C
+2) Ordinary token lock
+explain
+-Custom release time
+-Custom release times
+-Define lock quantity and logo
+-The lock up quantity is stored in the contract
+Contract source code:
+- https://github.com/BBSALE/bbsale/blob/main/MintToken/LockToken.sol
+Contract:
+0x3150976c8679b47a35a4a7d6a7D2B6c7b8fd0218
+3. Pre sale function
+explain
+-User defined pre-sale unit price
+-Soft / hardtop
+-Pre sale investment amount
+-Proportion of adding flow tank
+-Listing price
+-Pre sale time period and flow pool lock time (interact with mintliquiditytoken. Sol)
+-Some pre-sale instructions
+-The lock quantity is stored in the contract (mintliquiditytoken. Sol)
+technological process:
+-User publishing pre-sale contract
+-Other users can participate in the purchase within the time period
+-Success
+The contract initiator takes back the remaining tokens and platform coins
+The buyer takes back the token
+No matter which party withdraws money, liquidity will be generated
+-Fail
+Contract originator withdraws token
+The buyer takes back the platform currency
+Contract source code:
+- https://github.com/BBSALE/bbsale/blob/main/PerSale/CreatePreSale.sol
+Contract:
+0x0E1bF7177DffC6376e10CE4857FfBF8C69FFDD37

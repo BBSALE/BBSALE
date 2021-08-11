@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 import "./import/PreSaleInfo.sol";
 
 interface LockLPToken {
@@ -13,6 +13,11 @@ contract CreatePreSale is Ownable{
      address public platformAddress= 0xaF61074E68363BD4eB2330a207782b60a1950723;//平台 
      address public routerAddress= 0x10ED43C718714eb63d5aA57B78B54704E256024E;//uniswap地址 
      address public lockLpAddress = 0x2fB0BA3d4d14D72bA01582612981eBb40135931C;//锁币LP 
+     
+     //test
+     //address public platformAddress= 0x79944d4c1f01f7fc2A57C256F5Ce70c5C2A810Bd;//平台 
+     //address public routerAddress= 0xECC5428A66808FC40A464e5B3F4D265Df985E3E8;//uniswap地址 
+     //address public lockLpAddress = 0x31b5a150aA3dcD94Ee74f4dA1F0F39FB31c87036;//锁币LP 
     
      address[] public preSaleContracts;
      uint256 public preSaleContractsLength=0;
@@ -26,7 +31,7 @@ contract CreatePreSale is Ownable{
      
      uint256 public tokenSoldFee = 0; //%
      uint256 public ethRaisedFee = 2; //% 
-     
+     uint256 public createFee = 1*10**18;
      
     function doCreate(
         address _tokenAddress,
@@ -46,11 +51,12 @@ contract CreatePreSale is Ownable{
        require(_preSaleTime[0] >= block.timestamp,'Start time must be greater than block time ');
        require(_preSaleTime[0] <= _preSaleTime[1],'Start time must be less than end time ');
        require(_preSaleTime[2] > _preSaleTime[1],'liquidity unlock time must be greater than end time ');
+       require(msg.value>=createFee,'Create fee not enough');
 
       //计算用户要转入多少 
       (uint256 _tokenTotal,uint256 _transferAll) = calculateTranferAll(_tokenAddress,_rate[0],_rate[1],_rate[2],_cap[1]);
       
-      require(msg.value>=1*10**18,'Amount must be greater than 1 BNB');
+      
        
        uint256[] memory _fee = new uint256[](2);
        _fee[0] = tokenSoldFee;
@@ -117,11 +123,17 @@ contract CreatePreSale is Ownable{
         ethRaisedFee = _ethRaisedFee;
     }
     
+    function setCreateFee(uint256 _createFee) public virtual onlyOwner{
+        createFee = _createFee;
+    }
+    
     function setPlatformAddress(address _address) public virtual onlyOwner{
+        require(_address != address(0), "not allowed zero address");
         platformAddress = _address;
     }
     
     function setLockLpAddress(address _address) public virtual onlyOwner{
+        require(_address != address(0), "not allowed zero address");
         lockLpAddress = _address;
     }
     

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -513,6 +513,8 @@ contract LockToken is Ownable {
     
     mapping(uint256=>unlockData[]) public unLockInfo;
     
+    uint256 public lockFee = 2*10**17;
+    
     function doLock(
         address token_contract,
         uint256 lock_amount,
@@ -520,7 +522,7 @@ contract LockToken is Ownable {
         uint256 unlock_time,
         string memory logo
     ) external payable{
-        require(msg.value>=2*10**17,'Amount must be greater than 0.2 BNB');
+        require(msg.value>=lockFee,'Do lock fee not enough');
         require(
             vestingPeriod == 100 ||
             vestingPeriod == 50 ||
@@ -533,11 +535,21 @@ contract LockToken is Ownable {
             vestingPeriod == 1
         ,'Vesting period not allowed');
         
+         //领取规则 
+        uint256 Period = 100;
+        uint256 all = Period.div(vestingPeriod);
+        
+        uint256 _lock_amount = lock_amount.div(all);
+        _lock_amount = _lock_amount.mul(all);
+        
         Token token = Token(token_contract);
         
-        require(token.balanceOf(msg.sender) >= lock_amount,"balance not enough");
+        require(token.balanceOf(msg.sender) >= _lock_amount,"balance not enough");
         
-        token.transferFrom(msg.sender,address(this),lock_amount);
+        token.transferFrom(msg.sender,address(this),_lock_amount);
+        
+        
+        uint256 blockTimestamp = block.timestamp;
         
         LockTokenData memory _lockTokenData;
         _lockTokenData.index =lockTokenDataDataLength;
@@ -547,26 +559,24 @@ contract LockToken is Ownable {
         _lockTokenData.token_contract =token_contract;
         _lockTokenData.owner = msg.sender;
         _lockTokenData.total_amount = token.totalSupply();
-        _lockTokenData.lock_amount = lock_amount;
-        _lockTokenData.release_time = block.timestamp;
+        _lockTokenData.lock_amount = _lock_amount;
+        _lockTokenData.release_time = blockTimestamp;
         _lockTokenData.vestingPeriod =vestingPeriod;
         _lockTokenData.unlock_time = unlock_time;
         _lockTokenData.logo =logo;
         lockTokenDataList.push(_lockTokenData);
         
         userLockTokenData[msg.sender].push(lockTokenDataDataLength);
-        
-        //提取信息 
+      
         unlockData memory _unlockData;
-        _unlockData.unlock_time = unlock_time;
         
+        //一份间隔多少秒 
+        uint256  perTime = unlock_time.sub(blockTimestamp).div(all);
         
-        //领取规则 
-        uint256 Period = 100;
-        uint256 all = Period.div(vestingPeriod);
-        _unlockData.unlock_amount = lock_amount.div(all);
+        _unlockData.unlock_amount = _lock_amount.div(all);
         _unlockData.is_withdraw = false;
         for(uint i = 0; i < all; i++){
+            _unlockData.unlock_time = blockTimestamp.add(perTime.mul(i.add(1)));
             unLockInfo[lockTokenDataDataLength].push(_unlockData);
         }
         
@@ -579,6 +589,7 @@ contract LockToken is Ownable {
     }
     
     function doWithdraw(address token_contract,uint256 dataIndex) public {
+        require(tx.origin==msg.sender,"must be human");
         LockTokenData memory _LockTokenData;
         
         //根据索引获取锁仓的信息 
@@ -599,6 +610,10 @@ contract LockToken is Ownable {
                 token.transfer(msg.sender,_unlockData.unlock_amount);
            }
         }
+    }
+    
+    function setLockFee(uint256 _lockFee) public virtual onlyOwner {
+        lockFee = _lockFee;
     }
     
 }

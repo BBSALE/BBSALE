@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -759,6 +759,7 @@ contract PreSaleInfo is Context, Ownable{
     
     //购买币 
     function doContribute() public payable{
+        require(tx.origin==msg.sender,"must be human");
         uint256 _ethAmount = msg.value;
         
         //时间判断 
@@ -807,6 +808,7 @@ contract PreSaleInfo is Context, Ownable{
     function claimFunds() public {
         require(preSaleEndTime <= block.timestamp , "The pre-sale time is not over");
         require(preSaleStatus == 0 , "The pre-sale is not fail");
+        require(tx.origin==msg.sender,"must be human");
         
         if(!userHasClaim[msg.sender]){
             
@@ -834,6 +836,7 @@ contract PreSaleInfo is Context, Ownable{
             require(preSaleEndTime <= block.timestamp , "The pre-sale time is not over");
         }
         require(preSaleStatus ==1 , "The pre-sale is not success");
+        require(tx.origin==msg.sender,"must be human");
        
         if(!userHasClaim[msg.sender]){
             //添加流动性 

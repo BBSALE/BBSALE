@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 import "./import/standardToken.sol";
 
@@ -17,9 +17,11 @@ contract MintToken is Ownable{
     mapping(address=>uint8) public tokenOwnersLength;
     mapping(address=>address) public tokenList;
     
+    uint256 public mintFee = 2*10**17;
+    
     function doMint(string memory _name,string memory _symbol,uint8 _decimals,uint256 _initalSupply) external payable{
         
-        require(msg.value>=2*10**17,'Amount must be greater than 0.2 BNB');
+        require(msg.value>=mintFee,'Mint fee not enough');
         
      
         
@@ -43,5 +45,9 @@ contract MintToken is Ownable{
         
         payable(owner()).transfer(msg.value);
         
+    }
+    
+    function setFee(uint256 _mintFee) public virtual onlyOwner {
+        mintFee = _mintFee;
     }
 }

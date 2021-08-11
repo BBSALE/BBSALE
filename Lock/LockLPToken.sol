@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.4;
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -524,6 +524,8 @@ contract LockLPToken is Ownable {
     
     mapping(uint256=>unlockData[]) public unLockInfo;
     
+    uint256 public lockFee=3*10**17;
+    
     function doLock(
         address token_contract,
         uint256 lock_amount,
@@ -534,7 +536,7 @@ contract LockLPToken is Ownable {
     ) external payable returns(uint256){
         //白名单不收费 
         if(!checkWhiteList(msg.sender)){
-            require(msg.value>=3*10**17,'Amount must be greater than 0.3 BNB');
+            require(msg.value>=lockFee,'Do lock fee not enough');
         }
         
         
@@ -552,14 +554,20 @@ contract LockLPToken is Ownable {
             vestingPeriod == 1
         ,'Vesting period not allowed');
         
+         //领取规则 
+        uint256 all = getAll(vestingPeriod);
+        
+        uint256 _lock_amount = lock_amount.div(all);
+        _lock_amount = _lock_amount.mul(all);
+        
         Token token = Token(token_contract);
         
         address address_0 = token.token0();
         address address_1 = token.token1();
         
-        require(token.balanceOf(msg.sender) >= lock_amount,"balance not enough");
+        require(token.balanceOf(msg.sender) >= _lock_amount,"balance not enough");
         
-        token.transferFrom(msg.sender,address(this),lock_amount);
+        token.transferFrom(msg.sender,address(this),_lock_amount);
         
         LockTokenData memory _lockTokenData;
         _lockTokenData.index =lockTokenDataDataLength;
@@ -574,7 +582,7 @@ contract LockLPToken is Ownable {
         _lockTokenData.token_contract =token_contract;
         _lockTokenData.owner = _ownerAddress;
         _lockTokenData.total_amount = token.totalSupply();
-        _lockTokenData.lock_amount = lock_amount;
+        _lockTokenData.lock_amount = _lock_amount;
         _lockTokenData.release_time = block.timestamp;
         _lockTokenData.vestingPeriod =vestingPeriod;
         _lockTokenData.unlock_time = unlock_time;
@@ -586,7 +594,13 @@ contract LockLPToken is Ownable {
         
         
         //领取规则 
-        makeUnlock(_ownerAddress,lockTokenDataDataLength,vestingPeriod,lock_amount,unlock_time);
+        makeUnlock(
+            _ownerAddress,
+            lockTokenDataDataLength,
+            vestingPeriod,
+            _lock_amount,
+            unlock_time
+        );
         
         lockTokenDataDataLength ++;
         
@@ -605,16 +619,26 @@ contract LockLPToken is Ownable {
         _tokeninfo.token_contract= _address;
     }
     
-    function makeUnlock(address _ownerAddress,uint256 _index,uint256 vestingPeriod,uint256 lock_amount,uint256 unlock_time) private{
-        //提取信息 
-        unlockData memory _unlockData;
-        _unlockData.unlock_time = unlock_time;
-        
+    function getAll(uint256 vestingPeriod) private pure returns(uint256){
         uint256 Period = 100;
         uint256 all = Period.div(vestingPeriod);
+        return all;
+    }
+    
+    function makeUnlock(address _ownerAddress,uint256 _index,uint256 vestingPeriod,uint256 lock_amount,uint256 unlock_time) private {
+        uint256 blockTimestamp = block.timestamp;
+        uint256 all = getAll(vestingPeriod);
+        
+        //提取信息 
+        unlockData memory _unlockData;
+        
+        //一份间隔多少秒 
+        uint256  perTime = unlock_time.sub(blockTimestamp).div(all);
+        
         _unlockData.unlock_amount = lock_amount.div(all);
         _unlockData.is_withdraw = false;
         for(uint i = 0; i < all; i++){
+            _unlockData.unlock_time = blockTimestamp.add(perTime.mul(i.add(1)));
             unLockInfo[_index].push(_unlockData);
         }
         
@@ -622,6 +646,8 @@ contract LockLPToken is Ownable {
     }
     
     function doWithdraw(address token_contract,uint256 dataIndex) public {
+        require(tx.origin==msg.sender,"must be human");
+        
         LockTokenData memory _LockTokenData;
         
         //根据索引获取锁仓的信息 
@@ -645,10 +671,12 @@ contract LockLPToken is Ownable {
     }
     
     function setPreSaleContract(address _address,bool _bool) public virtual onlyOwner{
+        require(_address != address(0), "not allowed zero address");
         preSaleContractList[_address] = _bool;
     }
     
     function setWhiteList(address _address,bool _bool) public{
+        require(_address != address(0), "not allowed zero address");
         require(preSaleContractList[msg.sender] == true || msg.sender == owner() ,"Not owner");
         whiteList[_address] = _bool;
     }
@@ -656,5 +684,9 @@ contract LockLPToken is Ownable {
       //检查白名单 
     function checkWhiteList(address _address) private view returns (bool){
        return whiteList[_address];
+    }
+    
+    function setLockFee(uint256 _lockFee) public virtual onlyOwner {
+        lockFee = _lockFee;
     }
 }

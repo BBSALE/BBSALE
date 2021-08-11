@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.12;
+pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
 interface IERC20 {
@@ -697,7 +697,7 @@ contract LiquidityGeneratorToken is Context, IERC20, Ownable {
 
     mapping (address => bool) private _isExcluded;
     address[] private _excluded;
-    address public router = 0x10ED43C718714eb63d5aA57B78B54704E256024E;  // PCS v2 mainnet
+    address public router;  // PCS v2 mainnet
     uint256 private constant MAX = ~uint256(0);
     uint256 public _tTotal;
     uint256 private _rTotal;
@@ -736,7 +736,7 @@ contract LiquidityGeneratorToken is Context, IERC20, Ownable {
         inSwapAndLiquify = false;
     }
     
-    constructor (address tokenOwner,string memory name, string memory symbol,uint8 decimal, uint256 amountOfTokenWei,uint8 setTaxFee, uint8 setLiqFee, uint256 _maxTaxFee, uint256 _maxLiqFee, uint256 _minMxTxPer) public {
+    constructor (address tokenOwner,string memory name, string memory symbol,uint8 decimal, uint256 amountOfTokenWei,uint8 setTaxFee, uint8 setLiqFee, uint256 _maxTaxFee, uint256 _maxLiqFee, uint256 _minMxTxPer,address _router) public {
         _name = name;
         _symbol = symbol;
         _decimals = decimal;
@@ -750,7 +750,9 @@ contract LiquidityGeneratorToken is Context, IERC20, Ownable {
         minMxTxPercentage = _minMxTxPer;
         prevTaxFee = setTaxFee;        
         prevLiqFee = setLiqFee;
-
+        
+        router = _router;
+        
         _maxTxAmount = amountOfTokenWei;
         numTokensSellToAddToLiquidity = amountOfTokenWei.mul(1).div(1000);
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(router);
@@ -764,6 +766,8 @@ contract LiquidityGeneratorToken is Context, IERC20, Ownable {
         //exclude owner and this contract from fee
         _isExcludedFromFee[owner()] = true;
         _isExcludedFromFee[address(this)] = true;
+        
+       
         
         emit Transfer(address(0), tokenOwner, _tTotal);
     }

@@ -73,7 +73,7 @@ The buyer takes back the platform currency
 Contract source code:
 - https://github.com/BBSALE/bbsale/blob/main/PerSale/CreatePreSale.sol
 Contract:
-0x4c3C2E0b51B0DfAb105DF5Af597ab7BE8af20c6C
+0x18e9C0B3B15cFA3E0084BdEcD4518D4e826f7705
 
 new preSaleInfo contract owner is CreatePreSale
 

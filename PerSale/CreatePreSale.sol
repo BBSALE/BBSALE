@@ -13,11 +13,6 @@ contract CreatePreSale is Ownable{
      address public platformAddress= 0xaF61074E68363BD4eB2330a207782b60a1950723;//平台 
      address public routerAddress= 0x10ED43C718714eb63d5aA57B78B54704E256024E;//uniswap地址 
      address public lockLpAddress = 0x2fB0BA3d4d14D72bA01582612981eBb40135931C;//锁币LP 
-     
-     //test
-     //address public platformAddress= 0x79944d4c1f01f7fc2A57C256F5Ce70c5C2A810Bd;//平台 
-     //address public routerAddress= 0xECC5428A66808FC40A464e5B3F4D265Df985E3E8;//uniswap地址 
-     //address public lockLpAddress = 0x31b5a150aA3dcD94Ee74f4dA1F0F39FB31c87036;//锁币LP 
     
      address[] public preSaleContracts;
      uint256 public preSaleContractsLength=0;
@@ -44,9 +39,9 @@ contract CreatePreSale is Ownable{
     ) external  payable{
        require(preSaleSenderContracts[msg.sender]==address(0x0),'Has release pre-sale');
        require(_cap[0] <= _cap[1],"The soft cap cannot be higher than hard cap");
-       require(_contribution[0] <= _contribution[1],"The minimum contribution limit cannot be higher than max limit");
-       require(_contribution[1] <= _cap[1],"The maximum contribution limit cannot be higher than hard cap");
-       require(_rate[2] <= 100,'The liquidity amount needs to be a number <= 100');
+       require(_contribution[0] <= _contribution[1],"Min contribution limit cannot be higher than max limit");
+       require(_contribution[1] <= _cap[1],"Max contribution limit cannot be higher than hard cap");
+       require(_rate[2] <= 100,'Liquidity amount needs to be a number <= 100');
        require(_rate[1] <= _rate[0],'Swap Listing Rate too large');
        require(_preSaleTime[0] >= block.timestamp,'Start time must be greater than block time ');
        require(_preSaleTime[0] <= _preSaleTime[1],'Start time must be less than end time ');
@@ -56,8 +51,6 @@ contract CreatePreSale is Ownable{
       //计算用户要转入多少 
       (uint256 _tokenTotal,uint256 _transferAll) = calculateTranferAll(_tokenAddress,_rate[0],_rate[1],_rate[2],_cap[1]);
       
-      
-       
        uint256[] memory _fee = new uint256[](2);
        _fee[0] = tokenSoldFee;
        _fee[1] = ethRaisedFee;
@@ -68,7 +61,6 @@ contract CreatePreSale is Ownable{
         _address[2] = lockLpAddress;
         
         
-       
        PreSaleInfo _newToken = new PreSaleInfo(
              msg.sender,
              _tokenTotal,
@@ -94,9 +86,6 @@ contract CreatePreSale is Ownable{
             _information[7]
       );
         
-        
-       
-       
        preSaleContracts.push(address(_newToken)); 
        preSaleSenderContracts[msg.sender] = address(_newToken);
        preSaleContractsIndex[address(_newToken)] = preSaleContractsLength;
@@ -176,10 +165,10 @@ contract CreatePreSale is Ownable{
         //计算总额 
         uint256 _preSaleAmount =  _preSaleRate.mul(_hardcap).div(10**18);
          
-        //计算预售代币需要支付的费率 
+       
         uint256 tokenFeeAll = _preSaleAmount.mul(tokenSoldFee).div(100); 
             
-        //计算流动性需要多少代币
+       
         uint256 liquidityAll = _hardcap.mul(ethRaisedFee).div(100);
         liquidityAll = _hardcap.sub(liquidityAll);//扣除手续费 
         liquidityAll = liquidityAll.mul(_liquidityRate).div(100);//乘于流动性比例    

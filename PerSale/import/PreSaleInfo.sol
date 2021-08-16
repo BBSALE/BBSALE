@@ -790,7 +790,7 @@ contract PreSaleInfo is Context, Ownable{
         sellHistoriesList.push(_sellHistories);
         SellHistoriesLength++;
         
-        saleTokenAmount =  saleTokenAmount.add(_sellAmount);//已卖多少代币
+        saleTokenAmount =  saleTokenAmount.add(_sellAmount);
         saleEthAmount = saleEthAmount.add(_ethAmount);//已卖多少已ETH
         leftTokenAmount = leftTokenAmount.sub(_sellAmount);//剩下多少代币 
         
@@ -874,7 +874,7 @@ contract PreSaleInfo is Context, Ownable{
             //取回代币 
             IUniswapV2Pair _tokens = IUniswapV2Pair(tokenAddress);
             if(userbuyTokenAmount[msg.sender] > 0)
-               _tokens.transfer(address(this),userbuyTokenAmount[msg.sender]);
+               _tokens.transfer(msg.sender,userbuyTokenAmount[msg.sender]);
                
             userHasClaim[msg.sender] = true;
         }
@@ -888,8 +888,8 @@ contract PreSaleInfo is Context, Ownable{
     //设置最小最大购买数量 
     function  setContribution(uint256 _minContribution,uint256 _maxContribution) public {
         require(_creator==msg.sender,'modifier must be creator');
-        require(_minContribution <= _maxContribution ,"The minimum contribution limit cannot be higher than max limit");
-        require(_maxContribution <= hardCap,"The maximum contribution limit cannot be higher than hard cap");
+        require(_minContribution <= _maxContribution ,"Min contribution limit cannot be higher than max limit");
+        require(_maxContribution <= hardCap,"Max contribution limit cannot be higher than hard cap");
         
         minContribution = _minContribution;
         maxContribution = _maxContribution;
@@ -915,6 +915,8 @@ contract PreSaleInfo is Context, Ownable{
     function setWhiteList(address[] memory _addressList,bool _bool) public{
         require(_creator==msg.sender,'modifier must be creator');
         require(enableWhiteList==true,'must enable whitelist');
+		require(_addressList.length<=2000,'cannot be higher than than 2000');
+		
         for(uint256 i=0;i<_addressList.length;i++){
             whiteList[_addressList[i]] = _bool;
         }

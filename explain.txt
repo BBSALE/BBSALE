@@ -22,23 +22,34 @@ Contract:
 1) Liquidity lock
 explain
 -Custom release time
--Custom release times
+-Custom unlock times  (Divided up to 100 times , )
 -Define lock quantity and logo
 -The lock up quantity is stored in the contract
 Contract source code:
 - https://github.com/BBSALE/bbsale/blob/main/Lock/LockLPToken.sol
 Contract:
 0xAD02ae2d0b78bc2dF338fB5cba6Cd77E8998b39f
+
+Liquidity lock function description:
+When the liquidity owner initiates the lock, he needs to approve the transfer from the liquidity to the locked contract. After the contract transfers a specified amount of liquidity, the time and amount of liquidity for each unlock are calculated according to the unlock time and the number of releases, and the information is stored in the contract (unlockData). When the coin owner executes the withdrawal (doWithdraw), the amount of liquidity will be unlocked according to the time and amount and returned to the token owner 
+
+setPreSaleContract:Let CreatePreInfo allow the setting of a whitelist of pre-sale contracts, free of charge when liquidity is locked 
+
+
 2) Ordinary token lock
 explain
 -Custom release time
--Custom release times
+-Custom unlock times  (Divided up to 100 times )
 -Define lock quantity and logo
 -The lock up quantity is stored in the contract
 Contract source code:
 - https://github.com/BBSALE/bbsale/blob/main/MintToken/LockToken.sol
 Contract:
 0x869050Fb09b87e610058B656F9C084ff8145FB91
+
+Token lock function description:
+When a token owner initiates a lock, he needs to approve the transfer from the token to the locked contract. After the contract transfers a specified number of tokens, the time and number of tokens for each unlock are calculated according to the unlock time and the number of releases, and the information is stored in the contract (unlockData). When the coin owner executes the withdrawal (doWithdraw), the number of tokens will be unlocked according to the time and quantity and returned to the token owner 
+
 3. Pre sale function
 explain
 -User defined pre-sale unit price
@@ -46,9 +57,9 @@ explain
 -Pre sale investment amount
 -Proportion of adding flow tank
 -Listing price
--Pre sale time period and flow pool lock time (interact with mintliquiditytoken. Sol)
+-Pre sale time period and flow pool lock time (LockLPToken.sol)
 -Some pre-sale instructions
--The lock quantity is stored in the contract (mintliquiditytoken. Sol)
+-The lock quantity is stored in the contract (LockLPToken.sol)
 technological process:
 -User publishing pre-sale contract
 -Other users can participate in the purchase within the time period
@@ -63,3 +74,8 @@ Contract source code:
 - https://github.com/BBSALE/bbsale/blob/main/PerSale/CreatePreSale.sol
 Contract:
 0x4c3C2E0b51B0DfAb105DF5Af597ab7BE8af20c6C
+
+new preSaleInfo contract owner is CreatePreSale
+
+Pre sale function description:
+When issuing a pre-sale, the token owner must approve CreatePreSale to withdraw the token. After CreatePreSale transfers the corresponding number of tokens according to the set array, it will call preSaleInfo according to the set parameters to generate a new contract and transfer the tokens to the new contract. At the beginning of the pre-sale, investors will receive tokens according to the set maximum and minimum contribution. If the pre-sale is successful, the token owner will take away the (claimToken) platform tokens and the remaining tokens, and the contributors will take back the (claimToken) tokens. Currency, any party's operation will generate additional liquidity and lock it into the LockLPToken contract according to the set parameters. If it fails, the token owner takes back (claimFunds) tokens, and the donor takes back (claimFunds) platform tokens 

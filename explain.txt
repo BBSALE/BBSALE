@@ -18,6 +18,9 @@ Contract source code:
 - https://github.com/BBSALE/bbsale/blob/main/MintToken/MintLiquidityToken.sol
 Contract:
 0xc082953E179f22d51BdB24aBfA87a6E2a44D6b49
+
+Standard token features and Liquidity generator token features will transfer the owner to the creator after the token creation is completed, without retaining any permissions 
+
 2. Locking function
 1) Liquidity lock
 explain

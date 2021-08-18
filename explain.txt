@@ -17,7 +17,7 @@ explain:
 Contract source code:
 - https://github.com/BBSALE/bbsale/blob/main/MintToken/MintLiquidityToken.sol
 Contract:
-0xc082953E179f22d51BdB24aBfA87a6E2a44D6b49
+0xf55888580FBA4e2FF05749faba39649b32AA21f3
 
 Standard token features and Liquidity generator token features will transfer the owner to the creator after the token creation is completed, without retaining any permissions 
 
@@ -76,7 +76,7 @@ The buyer takes back the platform currency
 Contract source code:
 - https://github.com/BBSALE/bbsale/blob/main/PerSale/CreatePreSale.sol
 Contract:
-0x18e9C0B3B15cFA3E0084BdEcD4518D4e826f7705
+0xAF0073e5803EDCd4C513891556635f45DF6EFf13
 
 new preSaleInfo contract owner is CreatePreSale
 

@@ -19,7 +19,7 @@ contract MintToken is Ownable{
     mapping(address=>address) public tokenList;
     
     uint256 public mintFee = 4*10**17;
-    address router = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
+    address private router = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
     
     function doMint(string memory _name,string memory _symbol,uint8 _decimals,uint256 _initalSupply,uint8 _setTaxFee, uint8 _setLiqFee) external payable{
         

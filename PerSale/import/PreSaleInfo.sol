@@ -659,6 +659,7 @@ contract PreSaleInfo is Context, Ownable{
      
      uint256 public release_time;//发布时间 
      address public _creator;
+     uint256 private transferAll;
      uint256 public tokenTotal;
      address public tokenAddress;
      uint256 public preSaleAmount; //要预售的代币数量
@@ -674,13 +675,9 @@ contract PreSaleInfo is Context, Ownable{
      uint256 public liquidityUnLockTime;  //流动性解锁时间 
      uint public verified_type=0;
      
-     
-     address public uniswapV2Pair;//币对地址 
-     
      bool public hasAddLiquidity = false;
      
      
-    
     struct Information{
         string logo;
         string website;
@@ -694,8 +691,17 @@ contract PreSaleInfo is Context, Ownable{
     
     Information public information;
     
+    bool private locked;
+    modifier noReentrancy() {
+        require(!locked);
+        locked = true;
+        _;
+        locked = false;
+    }
+    
     constructor (
         address creator_,
+        uint256 _transferAll,
         uint256 _tokenTotal,
         address token_,
         uint256[] memory _cap, //0:soft 1:hard
@@ -710,6 +716,7 @@ contract PreSaleInfo is Context, Ownable{
         release_time = block.timestamp;
         
        _creator = creator_;
+       transferAll = _transferAll;
        tokenTotal = _tokenTotal;
        tokenAddress = token_;
        presaleRate = _Rate[0];
@@ -758,7 +765,7 @@ contract PreSaleInfo is Context, Ownable{
     }
     
     //购买币 
-    function doContribute() public payable{
+    function doContribute() public noReentrancy payable{
         require(tx.origin==msg.sender,"must be human");
         uint256 _ethAmount = msg.value;
         
@@ -805,8 +812,8 @@ contract PreSaleInfo is Context, Ownable{
     }
     
    //失败取回  
-    function claimFunds() public {
-        require(preSaleEndTime <= block.timestamp , "The pre-sale time is not over");
+    function claimFunds() public noReentrancy{
+        require(preSaleEndTime <= block.timestamp , "Pre-sale time is not over");
         require(preSaleStatus == 0 , "The pre-sale is not fail");
         require(tx.origin==msg.sender,"must be human");
         
@@ -831,16 +838,16 @@ contract PreSaleInfo is Context, Ownable{
     }
     
     //成功取回  
-     function claimToken() public {
+     function claimToken() public noReentrancy {
         if(isHardCap == 0){
-            require(preSaleEndTime <= block.timestamp , "The pre-sale time is not over");
+            require(preSaleEndTime <= block.timestamp , "Pre-sale time is not over");
         }
         require(preSaleStatus ==1 , "The pre-sale is not success");
         require(tx.origin==msg.sender,"must be human");
        
         if(!userHasClaim[msg.sender]){
             //添加流动性 
-            (uint256 ethFee,,uint256 liquidityEthAll) = swapAndLiquify();
+            (uint256 ethFee,uint256 liquidityAll,uint256 liquidityEthAll) = swapAndLiquify();
               
             //创建者提取 
             if(_creator==msg.sender){
@@ -856,15 +863,14 @@ contract PreSaleInfo is Context, Ownable{
               //取回剩余代币 
               IUniswapV2Pair _token = IUniswapV2Pair(tokenAddress);
                //手续费用 
+              
               uint256 fee = saleTokenAmount.mul(tokenSoldFee).div(100);
               if(fee > 0)
                 _token.transfer(platformAddress,fee);
+               
               
-              
-              
-              //剩下的代币 
-              uint256 _balance = _token.balanceOf(address(this));
-              _balance = _balance.sub(saleTokenAmount);
+              //剩下的代币
+              uint256 _balance = transferAll.sub(saleTokenAmount).sub(liquidityAll).sub(fee);
               if(_balance > 0)
                 _token.transfer(msg.sender,_balance);
               

@@ -12,7 +12,10 @@ contract CreatePreSale is Ownable{
      
      address public platformAddress= 0xaF61074E68363BD4eB2330a207782b60a1950723;//平台 
      address public routerAddress= 0x10ED43C718714eb63d5aA57B78B54704E256024E;//uniswap地址 
-     address public lockLpAddress = 0x2fB0BA3d4d14D72bA01582612981eBb40135931C;//锁币LP 
+     address public lockLpAddress = 0xAD02ae2d0b78bc2dF338fB5cba6Cd77E8998b39f;//锁币LP 
+     //address public platformAddress= 0x79944d4c1f01f7fc2A57C256F5Ce70c5C2A810Bd;//平台 
+     //address public routerAddress= 0xECC5428A66808FC40A464e5B3F4D265Df985E3E8;//uniswap地址 
+     //address public lockLpAddress = 0x31b5a150aA3dcD94Ee74f4dA1F0F39FB31c87036;//锁币LP 
     
      address[] public preSaleContracts;
      uint256 public preSaleContractsLength=0;
@@ -38,14 +41,14 @@ contract CreatePreSale is Ownable{
         uint _verified_type
     ) external  payable{
        require(preSaleSenderContracts[msg.sender]==address(0x0),'Has release pre-sale');
-       require(_cap[0] <= _cap[1],"The soft cap cannot be higher than hard cap");
+       require(_cap[0] <= _cap[1],"Soft cap cannot be higher than hard cap");
        require(_contribution[0] <= _contribution[1],"Min contribution limit cannot be higher than max limit");
        require(_contribution[1] <= _cap[1],"Max contribution limit cannot be higher than hard cap");
        require(_rate[2] <= 100,'Liquidity amount needs to be a number <= 100');
        require(_rate[1] <= _rate[0],'Swap Listing Rate too large');
-       require(_preSaleTime[0] >= block.timestamp,'Start time must be greater than block time ');
-       require(_preSaleTime[0] <= _preSaleTime[1],'Start time must be less than end time ');
-       require(_preSaleTime[2] > _preSaleTime[1],'liquidity unlock time must be greater than end time ');
+       require(_preSaleTime[0] >= block.timestamp,'Start time must be greater than block time');
+       require(_preSaleTime[0] <= _preSaleTime[1],'Start time must be less than end time');
+       require(_preSaleTime[2] > _preSaleTime[1],'liquidity unlock time must be greater than end time');
        require(msg.value>=createFee,'Create fee not enough');
 
       //计算用户要转入多少 
@@ -63,6 +66,7 @@ contract CreatePreSale is Ownable{
         
        PreSaleInfo _newToken = new PreSaleInfo(
              msg.sender,
+             _transferAll,
              _tokenTotal,
              _tokenAddress,
              _cap,
@@ -76,14 +80,7 @@ contract CreatePreSale is Ownable{
            
         initInfomation(
             _newToken,
-            _information[0],
-            _information[1],
-            _information[2],
-            _information[3],
-            _information[4],
-            _information[5],
-            _information[6],
-            _information[7]
+            _information
       );
         
        preSaleContracts.push(address(_newToken)); 
@@ -128,23 +125,16 @@ contract CreatePreSale is Ownable{
     
     function initInfomation(
         PreSaleInfo _newToken,
-        string memory logo,
-        string memory website,
-        string memory github,
-        string memory twitter,
-        string memory reddit,
-        string memory telegram,
-        string memory desc,
-        string memory provide) internal{
+        string[] memory _info) internal{
         _newToken.updateInfomation(
-            logo,
-            website,
-            github,
-            twitter,
-            reddit,
-            telegram,
-            desc,
-            provide
+            _info[0],
+            _info[1],
+            _info[2],
+            _info[3],
+            _info[4],
+            _info[5],
+            _info[6],
+            _info[7]
         );
 
     }

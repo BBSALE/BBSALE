@@ -683,7 +683,7 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
 contract LiquidityGeneratorToken is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
-    address dead = 0x000000000000000000000000000000000000dEaD;
+    address private dead = 0x000000000000000000000000000000000000dEaD;
     uint256 public maxLiqFee = 10;
     uint256 public maxTaxFee = 10;
     uint256 public minMxTxPercentage = 50;
@@ -716,7 +716,7 @@ contract LiquidityGeneratorToken is Context, IERC20, Ownable {
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
     
-    bool inSwapAndLiquify;
+    bool private inSwapAndLiquify;
     bool public swapAndLiquifyEnabled = false;
     
     uint256 public _maxTxAmount;
